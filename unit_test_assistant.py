@@ -1,3 +1,5 @@
+import asyncio
+
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
@@ -118,10 +120,10 @@ def update_unit_test_notes(get_unit_test_clicks, get_feedback_clicks, code, unit
     prop_id = ctx.triggered[0]['prop_id'].split('.')[0]
     if prop_id == 'get-unit-test-button':
         if get_unit_test_clicks is not None and get_unit_test_clicks > 0:
-            return generate_unit_test(code, reviewing_model)
+            return asyncio.run(generate_unit_test(code, reviewing_model))
     elif prop_id == 'fix-it-button':
         if get_feedback_clicks is not None and get_feedback_clicks > 0:
-            return generate_improved_unit_tests(unit_test, write_code_model, feedback)
+            return asyncio.run(generate_improved_unit_tests(unit_test, write_code_model, feedback))
 
     return unit_test if unit_test else ''
 
@@ -134,7 +136,7 @@ def update_unit_test_notes(get_unit_test_clicks, get_feedback_clicks, code, unit
 )
 def provide_unit_test_review_feedback(n_clicks, code, unit_test):
     if n_clicks is not None and n_clicks > 0:
-        return get_unit_test_feedback(code, unit_test, reviewing_model)
+        return asyncio.run(get_unit_test_feedback(code, unit_test, reviewing_model))
     return ''
 
 

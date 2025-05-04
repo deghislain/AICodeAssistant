@@ -1,3 +1,5 @@
+import asyncio
+
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
@@ -98,7 +100,7 @@ def update_reviewing_llm_selected(value):
 )
 def provide_review_feedback(n_clicks, code):
     if n_clicks is not None and n_clicks > 0:
-        return get_feedback(code, reviewing_model)
+        return asyncio.run(get_feedback(code, reviewing_model))
     return ''
 
 
@@ -110,7 +112,7 @@ def provide_review_feedback(n_clicks, code):
 )
 def fix_code(n_clicks, review, code):
     if n_clicks is not None and int(n_clicks) > 0:
-        return generate_improved_code(code, write_code_model, review)
+        return asyncio.run(generate_improved_code(code, write_code_model, review))
     return code
 
 
