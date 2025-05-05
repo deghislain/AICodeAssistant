@@ -3,7 +3,7 @@ from langchain.schema import HumanMessage, SystemMessage
 import logging
 from agent_factory import create_new_agent
 from prompts import (get_feedback_sys_prompt, get_improved_sys_prompt, get_unit_test_sys_fd_prompt,
-                     get_unit_test_sys_prompt, get_unit_test_sys_improved_prompt)
+                     get_unit_test_sys_prompt, get_unit_test_sys_improved_prompt, get_persona_sys_prompt)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -181,13 +181,13 @@ async def generate_improved_unit_tests(unit_tests: str, model_to_use: str, revis
         raise ValueError(f"Failed to generate improved unit tests: {str(e)}")
 
 
-async def process_prompt(prompt: str, model_to_use: str) -> str:
+async def process_prompt(prompt: str, model_to_use: str, selected_persona: str) -> str:
     logging.info(f"*****************************process_prompt START with input: {prompt} and {model_to_use}")
     if not prompt or not model_to_use:
         raise ValueError("All parameters (prompt, model_to_use) must be provided.")
 
     messages = [
-        SystemMessage(content="You are a helpful AI assistant"),
+        SystemMessage(content=get_persona_sys_prompt(selected_persona)),
         HumanMessage(content=prompt)
     ]
     llm = ChatOllama(

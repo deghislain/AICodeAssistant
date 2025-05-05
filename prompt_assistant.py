@@ -7,12 +7,14 @@ import pandas as pd
 from llm_calls import process_prompt
 
 prompt_model = ""
+selected_persona = ""
 # Initialize the Dash app
 app = dash.Dash(__name__)
 
 # Create a DataFrame
 df = pd.DataFrame({
-    'first column': ["granite3.3:2b", "llama3.2:latest", "gemma3:4b-it-qat", "granite3.3:8b", "deepseek-coder:6.7b"]
+    'first column': ["granite3.3:2b", "llama3.2:latest", "gemma3:4b-it-qat", "granite3.3:8b", ""],
+    'second column': ["prompt_engineer", "english_teacher", "software_engineer", "translator", "researcher"]
 })
 
 # Define the app layout
@@ -29,6 +31,15 @@ app.layout = html.Div([
                 ),
                 html.P(id='prompt-llm-selected')
             ], style={'width': '20%', 'display': 'inline-block'}),
+            html.Div([
+                html.Label('Select Persona'),
+                dcc.Dropdown(
+                    id='persona',
+                    options=[{'label': i, 'value': i} for i in df['second column']],
+                    value=df['second column'][0]
+                ),
+                html.P(id='selected_persona')
+            ], style={'width': '20%', 'float': 'right'})
         ])
     ]),
     html.Div([
@@ -66,15 +77,23 @@ def update_prompt_llm_selected(value):
     prompt_model = value
     return f'You selected: {value}'
 
+@app.callback(
+    Output('selected_persona', 'children'),
+    [Input('persona', 'value')]
+)
+def update_reviewing_llm_selected(value):
+    global selected_persona
+    selected_persona = value
+    return f'You selected: {value}'
 
 @app.callback(
     Output('reviewing-prompt-notes', 'value'),
     [Input('submit-button', 'n_clicks')],
     [State('prompt-notes', 'value')]
 )
-def provide_review_feedback(n_clicks, prompt):
+def prompt_handler(n_clicks, prompt):
     if n_clicks is not None and n_clicks > 0:
-        return asyncio.run(process_prompt(prompt, prompt_model))
+        return asyncio.run(process_prompt(prompt, prompt_model, selected_persona))
     return ''
 
 
