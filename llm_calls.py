@@ -1,4 +1,4 @@
-from langchain_openai import ChatOpenAI
+from langchain_ollama import ChatOllama
 from langchain.schema import HumanMessage, SystemMessage
 import logging
 from agent_factory import create_new_agent
@@ -179,3 +179,23 @@ async def generate_improved_unit_tests(unit_tests: str, model_to_use: str, revis
     except Exception as e:
         logging.error(f"An error occurred while generating improved unit tests: {e}")
         raise ValueError(f"Failed to generate improved unit tests: {str(e)}")
+
+
+async def process_prompt(prompt: str, model_to_use: str) -> str:
+    logging.info(f"*****************************process_prompt START with input: {prompt} and {model_to_use}")
+    if not prompt or not model_to_use:
+        raise ValueError("All parameters (prompt, model_to_use) must be provided.")
+
+    messages = [
+        SystemMessage(content="You are a helpful AI assistant"),
+        HumanMessage(content=prompt)
+    ]
+    llm = ChatOllama(
+        model=model_to_use,
+        temperature=0,
+    )
+    logging.info("LLM created")
+    result = await llm.ainvoke(messages)
+
+    logging.info(f"*****************************process_prompt END with output: {result.content} ")
+    return result.content
