@@ -207,14 +207,10 @@ async def process_prompt(prompt: str, model_to_use: str, selected_persona: str) 
     if not prompt or not model_to_use:
         raise ValueError("All parameters (prompt, model_to_use) must be provided.")
     
-    complete_prompt = """Review and optimize the following Python code in term of: readability, clarity, 
-                        and performance. Here is the code: """ + prompt
 
-
-    print(f"************************//////////////////////complete prompt {complete_prompt}")
     messages = [
         SystemMessage(content=get_persona_sys_prompt(selected_persona)),
-        HumanMessage(content=complete_prompt),
+        HumanMessage(content=prompt),
     ]
     llm = ChatOllama(
         model=model_to_use,
