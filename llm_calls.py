@@ -2,8 +2,14 @@ from langchain_ollama import ChatOllama
 from langchain.schema import HumanMessage, SystemMessage
 import logging
 from agent_factory import create_new_agent
-from prompts import (get_feedback_sys_prompt, get_improved_sys_prompt, get_unit_test_sys_fd_prompt,
-                     get_unit_test_sys_prompt, get_unit_test_sys_improved_prompt, get_persona_sys_prompt)
+from prompts import (
+    get_feedback_sys_prompt,
+    get_improved_sys_prompt,
+    get_unit_test_sys_fd_prompt,
+    get_unit_test_sys_prompt,
+    get_unit_test_sys_improved_prompt,
+    get_persona_sys_prompt,
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -182,20 +188,44 @@ async def generate_improved_unit_tests(unit_tests: str, model_to_use: str, revis
 
 
 async def process_prompt(prompt: str, model_to_use: str, selected_persona: str) -> str:
+    """
+    Generates a response using the specified language model and persona.
+
+    Args:
+        prompt (str): The user's input message.
+        model_to_use (str): The name of the language model to use.
+        selected_persona (str): The persona to be used for generating the response.
+        temperature (int, optional): Controls the randomness of the model's predictions. Defaults to 0.
+
+    Returns:
+        str: The generated response from the language model.
+
+    Raises:
+        ValueError: If any required parameters are missing or invalid.
+    """
     logging.info(f"*****************************process_prompt START with input: {prompt} and {model_to_use}")
     if not prompt or not model_to_use:
         raise ValueError("All parameters (prompt, model_to_use) must be provided.")
+    
+    complete_prompt = """Review and optimize the following Python code in term of: readability, clarity, 
+                        and performance. Here is the code: """ + prompt
 
+
+    print(f"************************//////////////////////complete prompt {complete_prompt}")
     messages = [
         SystemMessage(content=get_persona_sys_prompt(selected_persona)),
-        HumanMessage(content=prompt)
+        HumanMessage(content=complete_prompt),
     ]
     llm = ChatOllama(
         model=model_to_use,
         temperature=0,
     )
-    logging.info("LLM created")
-    result = await llm.ainvoke(messages)
+
+    try:
+        result = await llm.ainvoke(messages)
+    except Exception as e:
+        logging.error(f"Error during ainvoke: {e}")
+        raise
 
     logging.info(f"*****************************process_prompt END with output: {result.content} ")
     return result.content
