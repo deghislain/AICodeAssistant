@@ -9,6 +9,7 @@ from prompts import (
     get_unit_test_sys_prompt,
     get_unit_test_sys_improved_prompt,
     get_persona_sys_prompt,
+    get_fix_bug_sys_prompt
 )
 
 # Configure logging
@@ -206,7 +207,6 @@ async def process_prompt(prompt: str, model_to_use: str, selected_persona: str) 
     logging.info(f"*****************************process_prompt START with input: {prompt} and {model_to_use}")
     if not prompt or not model_to_use:
         raise ValueError("All parameters (prompt, model_to_use) must be provided.")
-    
 
     messages = [
         SystemMessage(content=get_persona_sys_prompt(selected_persona)),
@@ -225,3 +225,31 @@ async def process_prompt(prompt: str, model_to_use: str, selected_persona: str) 
 
     logging.info(f"*****************************process_prompt END with output: {result.content} ")
     return result.content
+
+
+async def fix_bug(original_code: str, model_to_use: str, error_message: str) -> str:
+    print("orig code********************** " + original_code)
+    print("model_to_use********************** " + model_to_use)
+    print("error_message********************** " + error_message)
+    # Set up logging
+    if not model_to_use or not original_code or not error_message:
+        raise ValueError("All parameters (original_code, model_to_use, and revision_feedback) must be provided.")
+
+    try:
+        coder_agent = create_new_agent(model_to_use)
+        logging.info("agent created *************************************")
+        messages = [
+            SystemMessage(
+                content=get_fix_bug_sys_prompt()
+            ),
+            HumanMessage(
+                content=f"{original_code} Here is the error message: {error_message}. Fix the error."
+            )
+        ]
+        result = await coder_agent.ainvoke({'messages': messages})
+        new_code = result["messages"][-1].content
+        return new_code
+
+    except Exception as e:
+        logging.error(f"An error occurred while fixing code: {e}")
+        raise ValueError(f"Failed to fix code: {str(e)}")

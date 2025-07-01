@@ -13,8 +13,8 @@ app = dash.Dash(__name__)
 
 # Create a DataFrame
 df = pd.DataFrame({
-    'first column': ["granite3.3:2b", "llama3.2:latest", "gemma3:4b-it-qat", "granite-code:8b", "codellama:7b"],
-    'second column': ["prompt_engineer", "english_teacher", "software_engineer", "translator", "researcher"]
+    'first column': ["granite3.3:2b", "llama3.2:latest", "granite-code:8b", "codellama:7b", "", ""],
+    'second column': ["prompt_engineer", "english_teacher", "software_engineer", "translator", "researcher", "writer"]
 })
 
 # Define the app layout
